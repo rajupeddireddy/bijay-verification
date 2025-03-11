@@ -1,333 +1,152 @@
-import React , {useState} from "react";
-import Header from "../../components/Header/Header";
-import "./index.css";
-import CustomTextField from "../../components/TextField/TextField";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import { Typography, Button, TextField } from "@mui/material";
+import React, { useState } from "react";
+import { Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, TextField, Button, Typography, Autocomplete, Stack, IconButton } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { styled } from "@mui/material/styles";
-import InputFileUpload from '../../components/Fileupload/FileUpload'
-import {Box, Label} from "@mui/material";
-import ControlPointIcon from '@mui/icons-material/ControlPoint';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
+const personsOptions = [
+  { label: "Applicant" },
+  { label: "Father" },
+  { label: "Mother" },
+  { label: "Wife" },
+  { label: "Brother" },
+  { label: "Neighbour" },
+  { label: "Co Applicant" },
+];
 
 export default function Form() {
-  const [fileEntries, setFileEntries] = useState([{ fileName: '', file: null, url:null }])
+  const [fileEntries, setFileEntries] = useState([{ fileName: "", file: null, url: null }]);
 
-  const getS3FileUrl = async (newFile) => {
-    const file=new FormData();
-    file.append('file',newFile)
-    file.append('type',"MOU")
-    try {
-        const response = await fetch(`/file/upload`,file)
-        const s3Url = await response.data.data.s3Url
-        return s3Url
-
-        
-    } catch (error) {
-        alert(`${error}, Please Reupload MOU`)
-    }
-  }
-
-  
-  const handleFileNameChange = (index, value) => {
-    setFileEntries((prevEntries) =>
-      prevEntries.map((entry, i) =>
-        i === index ? { ...entry, fileName: value } : entry
-      )
+  const handleFileChange = (index, file) => {
+    const url = URL.createObjectURL(file); // Simulating file upload
+    setFileEntries((prev) =>
+      prev.map((entry, i) => (i === index ? { ...entry, file, url } : entry))
     );
   };
 
   const handleAddMoreFiles = () => {
-    setFileEntries([...fileEntries, { fileName: '', file: null, url:null }]);
-
-  }
-
-  const handleRemoveFiles =(index) => {
-    setFileEntries((prevEntries) => prevEntries.filter((_, i) => i !== index));
-  }
-
-  const handleFileChange = async (index, file) => {
-    const url =  await getS3FileUrl(file)
-    setFileEntries((prevEntries) =>
-      prevEntries.map((entry, i) =>
-        i === index ? { ...entry, file, url } : entry
-      )
-    );
+    setFileEntries([...fileEntries, { fileName: "", file: null, url: null }]);
   };
 
-  const hanldeClearFile = () => {
-    setFileEntries([{ fileName: '', file: null, url:null }])
-  }
+  const handleRemoveFiles = (index) => {
+    setFileEntries((prev) => prev.filter((_, i) => i !== index));
+  };
 
   return (
-    <div>
-      <form className="form">
-        <Typography sx={{fontSize: '20px', fontWeight: 'bold'}}>BJ25000010</Typography>
-        <Typography  sx={{fontSize: '20px', fontWeight: 'bold'}}>Applicant: Raju Peddireddi</Typography>
-        <div>
-          <FormControl
-            sx={{ display: "flex", flexDirection: "row",justifyContent: 'space-between', alignItems: "center" }}
-          >
-            <FormLabel id="demo-radio-buttons-group-label">House</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              defaultValue="Own"
-              name="radio-buttons-group"
-              sx={{ display: "flex", flexDirection: "row", ml: 2 }}
-            >
-              <FormControlLabel value="own" control={<Radio />} label="Own" />
-              <FormControlLabel value="rent" control={<Radio />} label="Rent" />
-            </RadioGroup>
-          </FormControl>
-          <FormControl
-            sx={{ display: "flex", flexDirection: "row",justifyContent: 'space-between', alignItems: "center", mb:2 }}
-          >
-            <FormLabel id="demo-radio-buttons-group-label">Aaadhar</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              name="radio-buttons-group"
-              sx={{ display: "flex", flexDirection: "row", ml: 2 }}
-            >
-              <FormControlLabel
-                value="verified"
-                control={<Radio />}
-                label="Verified"
-              />
-              <FormControlLabel
-                value="notVerified"
-                control={<Radio />}
-                label="Not Verified"
-              />
-              
-            </RadioGroup>
-          </FormControl>
-          <FormControl
-            sx={{ display: "flex", flexDirection: "row",justifyContent: 'space-between', alignItems: "center" , mb:2 }}
-          >
-            <FormLabel id="demo-radio-buttons-group-label">PAN</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              name="radio-buttons-group"
-              sx={{ display: "flex", flexDirection: "row", ml: 2 }}
-            >
-              <FormControlLabel
-                value="verified"
-                control={<Radio />}
-                label="Verified"
-              />
-              <FormControlLabel
-                value="notVerified"
-                control={<Radio />}
-                label="Not Verified"
-              />
-            </RadioGroup>
-          </FormControl>
-    
-          <Box sx={{display:'flex', flexDirection: 'column', gap:1, mb:3}}>
-            <Typography sx={{textAlign: 'start'}}>Job/Business</Typography>
-            <TextField id="profession" label="Profession" variant="outlined" />
-            <TextField id="income" label="Income" variant="outlined" />
-          </Box>
-          <Typography sx={{textAlign:'start'}}>Upload Files</Typography>
-          {/* <Box sx={{display:'flex', flexDirection:'row', justifyContent:'space-between', alignItems: 'center', mt:1}}>
-            <TextField id="1" label="File Name" variant="outlined" size='small'/>
-            <input type="file" style={{marginLeft: '5px'}}/>
-            <ControlPointIcon sx={{cursor: 'pointer'}}/>
-          </Box> */}
+    <Box sx={{ maxWidth: 600, mx: "auto", p: 3 }}>
+      <Typography variant="h6">BJ25000010</Typography>
+      <Typography variant="subtitle1">Applicant: Raju Peddireddi</Typography>
+      <Typography variant="subtitle1">Loan Type: Personal Loan</Typography>
 
-            {fileEntries?.map((entry, index) => {
-              return (
-                <Box sx={{display:'flex', alignItems:'center', marginBottom:'10px'}}>
-                  <TextField
-                    type="text"
-                    size='small'
-                    placeholder="Enter File Name"
-                    value={entry.fileName}
-                    onChange={(e) => handleFileNameChange(index, e.target.value)}
-                    style={{ maxWidth: 230, marginRight: '10px' }}
-                  />
-                  <input 
-                    type="file"
-                    name="file1"
-                    id="logo"
-                    placeholder="Institute Contact here"
-                    onChange={(e) => handleFileChange(index, e.target.files[0])}
-                    style={{ marginLeft:'5px',width: 300,}}
-                    
-                  />
-                  {index !==0 && <RemoveCircleOutlineIcon sx={{cursor:'pointer'}} onClick={() => handleRemoveFiles(index)}  fontSize='small'/>}
-                  <AddCircleIcon sx={{cursor:'pointer'}} onClick={handleAddMoreFiles} fontSize='small'/>
-                </Box>
-              )
-            })}
+      {/* House Ownership */}
+      <FormControl fullWidth sx={{ mt: 2, display:'flex', flexDirection:'row', alignItems:'center',  }}>
+        <FormLabel sx={{width:'40%', textAlign:'start'}}>House</FormLabel>
+        <RadioGroup  sx={{display:'flex', flexDirection:'row', alignItems:'center',justifyContent:'space-between',  width:'60%'}}>
+          <FormControlLabel value="own" control={<Radio />} label="Own" />
+          <FormControlLabel value="rent" control={<Radio />} label="Rent" />
+        </RadioGroup>
+      </FormControl>
 
-          <FormControl
-            sx={{ display: "flex", flexDirection: "row", alignItems: "center" , mb:2, mt:4 }}
-          >
-            <FormLabel id="demo-radio-buttons-group-label">File Satisfaction</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              name="radio-buttons-group"
-              sx={{ display: "flex", flexDirection: "row", ml: 2 }}
-            >
-              <FormControlLabel
-                value="yes"
-                control={<Radio />}
-                label="Yes"
-              />
-              <FormControlLabel
-                value="no"
-                control={<Radio />}
-                label="No"
-              />
-              
-            </RadioGroup>
-          </FormControl>
-          <textarea rows={"5"}  placeholder="Comments" style={{width: '100%'}}></textarea>
-        </div>
-      </form>
-      <form className="form">
-        <Typography  sx={{fontSize: '20px', fontWeight: 'bold'}}>Co-Applicant 1: Vishnu Vardha Reddy</Typography>
-        <div>
-          <FormControl
-            sx={{ display: "flex", flexDirection: "row",justifyContent: 'space-between', alignItems: "center" }}
-          >
-            <FormLabel id="demo-radio-buttons-group-label">House</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              defaultValue="Own"
-              name="radio-buttons-group"
-              sx={{ display: "flex", flexDirection: "row", ml: 2 }}
-            >
-              <FormControlLabel value="own" control={<Radio />} label="Own" />
-              <FormControlLabel value="rent" control={<Radio />} label="Rent" />
-            </RadioGroup>
-          </FormControl>
-          <FormControl
-            sx={{ display: "flex", flexDirection: "row",justifyContent: 'space-between', alignItems: "center", mb:2 }}
-          >
-            <FormLabel id="demo-radio-buttons-group-label">Aaadhar</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              name="radio-buttons-group"
-              sx={{ display: "flex", flexDirection: "row", ml: 2 }}
-            >
-              <FormControlLabel
-                value="verified"
-                control={<Radio />}
-                label="Verified"
-              />
-              <FormControlLabel
-                value="notVerified"
-                control={<Radio />}
-                label="Not Verified"
-              />
-              
-            </RadioGroup>
-          </FormControl>
-          <FormControl
-            sx={{ display: "flex", flexDirection: "row",justifyContent: 'space-between', alignItems: "center" , mb:2 }}
-          >
-            <FormLabel id="demo-radio-buttons-group-label">PAN</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              name="radio-buttons-group"
-              sx={{ display: "flex", flexDirection: "row", ml: 2 }}
-            >
-              <FormControlLabel
-                value="verified"
-                control={<Radio />}
-                label="Verified"
-              />
-              <FormControlLabel
-                value="notVerified"
-                control={<Radio />}
-                label="Not Verified"
-              />
-            </RadioGroup>
-          </FormControl>
-    
-          <Box sx={{display:'flex', flexDirection: 'column', gap:1, mb:3}}>
-            <Typography sx={{textAlign: 'start'}}>Job/Business</Typography>
-            <TextField id="profession" label="Profession" variant="outlined" />
-            <TextField id="income" label="Income" variant="outlined" />
-          </Box>
-          <Typography sx={{textAlign:'start'}}>Upload Files</Typography>
-          {/* <Box sx={{display:'flex', flexDirection:'row', justifyContent:'space-between', alignItems: 'center', mt:1}}>
-            <TextField id="1" label="File Name" variant="outlined" size='small'/>
-            <input type="file" style={{marginLeft: '5px'}}/>
-            <ControlPointIcon sx={{cursor: 'pointer'}}/>
-          </Box> */}
+      {/* Aadhaar Verification */}
+      <FormControl fullWidth sx={{ mt: 2,display:'flex', flexDirection:'row', alignItems:'center',   }}>
+        <FormLabel sx={{width:'40%', textAlign:'start'}}>Aadhaar</FormLabel>
+        <RadioGroup  sx={{display:'flex', flexDirection:'row', alignItems:'center',justifyContent:'space-between',  width:'60%', flexWrap:'nowrap'}}>
+          <FormControlLabel value="verified" control={<Radio />} label="Verified" />
+          <FormControlLabel value="notVerified" control={<Radio />} label="Not Verified" />
+        </RadioGroup>
+      </FormControl>
 
-            {fileEntries?.map((entry, index) => {
-              return (
-                <Box sx={{display:'flex', alignItems:'center', marginBottom:'10px'}}>
-                  <TextField
-                    type="text"
-                    size='small'
-                    placeholder="Enter File Name"
-                    value={entry.fileName}
-                    onChange={(e) => handleFileNameChange(index, e.target.value)}
-                    style={{ maxWidth: 230, marginRight: '10px' }}
-                  />
-                  <input 
-                    type="file"
-                    name="file1"
-                    id="logo"
-                    placeholder="Institute Contact here"
-                    onChange={(e) => handleFileChange(index, e.target.files[0])}
-                    style={{ marginLeft:'5px',width: 300,}}
-                    
-                  />
-                  {index !==0 && <RemoveCircleOutlineIcon sx={{cursor:'pointer'}} onClick={() => handleRemoveFiles(index)}  fontSize='small'/>}
-                  <AddCircleIcon sx={{cursor:'pointer'}} onClick={handleAddMoreFiles} fontSize='small'/>
-                </Box>
-              )
-            })}
+      {/* Employment Status */}
+      <FormControl fullWidth sx={{ mt: 2, display:'flex', flexDirection:'row', alignItems:'center', }}>
+        <FormLabel sx={{width:'40%', textAlign:'start'}}>Employment</FormLabel>
+        <RadioGroup sx={{display:'flex', flexDirection:'row',justifyContent:'space-between', alignItems:'center',width:'60%',  flexWrap:'nowrap' }}>
+          <FormControlLabel value="salaried" control={<Radio />} label="Salaried" />
+          <FormControlLabel value="self-employed" control={<Radio />} label="Self Employed" />
+        </RadioGroup>
+      </FormControl>
 
-          <FormControl
-            sx={{ display: "flex", flexDirection: "row", alignItems: "center" , mb:2, mt:4 }}
-          >
-            <FormLabel id="demo-radio-buttons-group-label">File Satisfaction</FormLabel>
-            <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
-              name="radio-buttons-group"
-              sx={{ display: "flex", flexDirection: "row", ml: 2 }}
-            >
-              <FormControlLabel
-                value="yes"
-                control={<Radio />}
-                label="Yes"
-              />
-              <FormControlLabel
-                value="no"
-                control={<Radio />}
-                label="No"
-              />
-              
-            </RadioGroup>
-          </FormControl>
-          <textarea rows={"5"}  placeholder="Comments" style={{width: '100%'}}></textarea>
-        </div>
-      </form>
-    </div>
+      {/* Job & Income */}
+      <Stack spacing={2} sx={{ mt: 2 }}>
+        <TextField label="Profession" variant="outlined" fullWidth />
+        <TextField label="Income" variant="outlined" type="number" fullWidth />
+      </Stack>
+
+      {/* Contact Details */}
+      <Stack spacing={2} sx={{ mt: 2 }}>
+        <TextField label="Phone 1" variant="outlined" type="number" fullWidth />
+        <TextField label="Phone 2" variant="outlined" type="number" fullWidth />
+      </Stack>
+
+      {/* Address */}
+      <TextField label="House Address" variant="outlined" multiline rows={3} fullWidth sx={{ mt: 2 }} />
+
+      {/* Person Met */}
+      <Autocomplete
+        options={personsOptions}
+        renderInput={(params) => <TextField {...params} label="Person Met" fullWidth />}
+        sx={{ mt: 2 }}
+      />
+
+      {/* File Upload */}
+      <Typography sx={{ mt: 2 }}>Upload Files</Typography>
+      {fileEntries.map((entry, index) => (
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }} key={index}>
+          <TextField
+            size="small"
+            placeholder="Enter File Name"
+            value={entry.fileName}
+            onChange={(e) => {
+              const newEntries = [...fileEntries];
+              newEntries[index].fileName = e.target.value;
+              setFileEntries(newEntries);
+            }}
+            sx={{ flex: 1 }}
+          />
+          <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
+            Upload
+            <input type="file" hidden onChange={(e) => handleFileChange(index, e.target.files[0])} />
+          </Button>
+          {index !== 0 && (
+            <IconButton color="error" onClick={() => handleRemoveFiles(index)}>
+              <RemoveCircleOutlineIcon />
+            </IconButton>
+          )}
+          <IconButton color="primary" onClick={handleAddMoreFiles}>
+            <AddCircleIcon />
+          </IconButton>
+        </Stack>
+      ))}
+
+      {/* Uploaded File List */}
+      {fileEntries.map(
+        (entry, index) =>
+          entry.file && (
+            <Box key={index} sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 1, bgcolor: "#f5f5f5", mt: 1, borderRadius: 1 }}>
+              <Typography variant="body2">{entry.file.name}</Typography>
+              <IconButton size="small" onClick={() => handleRemoveFiles(index)}>
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          )
+      )}
+
+      {/* File Satisfaction */}
+      <FormControl fullWidth sx={{ mt: 2, display:'flex', flexDirection:'row', alignItems:'center' }}>
+        <FormLabel  sx={{width:'40%', textAlign:'start'}}>File Satisfaction</FormLabel>
+        <RadioGroup sx={{display:'flex', flexDirection:'row',justifyContent:'space-between', alignItems:'center',width:'60%',  flexWrap:'nowrap' }}>
+          <FormControlLabel value="positive" control={<Radio />} label="Positive" />
+          <FormControlLabel value="negative" control={<Radio />} label="Negative" />
+        </RadioGroup>
+      </FormControl>
+
+      {/* Comments */}
+      <TextField label="Comments" variant="outlined" multiline rows={3} fullWidth sx={{ mt: 2 }} />
+
+      {/* Submit Button */}
+      <Button variant="contained" color="primary" fullWidth sx={{ mt: 3 }}>
+        Submit
+      </Button>
+    </Box>
   );
 }
