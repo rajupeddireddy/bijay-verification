@@ -45,6 +45,8 @@ export default function Form() {
     fileEntries: [],
   });
 
+  const [errors, setErros] = useState({})
+
   // Handle Change
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,9 +87,43 @@ export default function Form() {
     }));
   };
 
+  const formValidation = () => {
+    let newErrors = {}
+    if(!formData.houseType) newErrors.houseType = '*House type is required'
+    if (!formData.houseAddress.trim()) newErrors.houseAddress = "*Address is required";
+    if (!formData.aadhaarStatus) newErrors.aadhaarStatus = "*Aadhaar status is required";
+    if (!formData.panStatus) newErrors.panStatus = "*PAN status is required";
+    if (!formData.employment) newErrors.employment = "Employment status is required";
+    if ((formData.employment === "salaried" || formData.employment === "self-employed") && !formData.employerName.trim()) newErrors.employerName = "*Employer name is required";
+    if ((formData.employment === "salaried"|| formData.employment === "self-employed") && (!formData.salary || formData.salary <= 0)) newErrors.salary = "*Salary must be greater than 0";
+    
+    if (!/^\d{10}$/.test(formData.refNumbers.ref1)) newErrors.ref1 = "*Reference number must be 10 digits";
+    if (!/^\d{10}$/.test(formData.refNumbers.ref2)) newErrors.ref2 = "*Reference number must be 10 digits";
+
+    if (!formData.email.trim()) {
+      newErrors.email = "*Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "*Invalid email format";
+    }
+
+    if (!formData.personMeet) newErrors.personMeet = "*Person met is required";
+    if (!formData.comments.trim()) newErrors.comments = "*Comments are required";
+    if (!formData.fileSatisfaction) newErrors.fileSatisfaction = "*File satisfaction is required";
+
+    setErros(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   // Submit Form
   const handleSubmit = () => {
-    console.log("Form Data:", formData);
+    if(formValidation()){
+      console.log('Form Data Submitted: ', formData)
+      alert("Form submitted successfully!")
+    }
+    else{
+      console.log("Validation Error: ", errors);
+    }
+    
   };
 
   return (
@@ -140,6 +176,7 @@ export default function Form() {
           />
         </RadioGroup>
       </FormControl>
+      <Typography color="error" sx={{textAlign:'start', fontSize:12}}>{errors.houseType}</Typography>
 
       {/* Address */}
       <TextField
@@ -152,6 +189,8 @@ export default function Form() {
         name="houseAddress"
         value={formData?.houseAddress}
         onChange={handleChange}
+        error={!!errors.houseAddress}
+        helperText={errors.houseAddress}
       />
 
       {/* Aadhaar Verification */}
@@ -192,6 +231,7 @@ export default function Form() {
           />
         </RadioGroup>
       </FormControl>
+      <Typography color="error" sx={{textAlign:'start', fontSize:12}}>{errors.aadhaarStatus}</Typography>
 
       {/* Pan Verification */}
       <FormControl
@@ -231,6 +271,7 @@ export default function Form() {
           />
         </RadioGroup>
       </FormControl>
+      <Typography color="error" sx={{textAlign:'start', fontSize:12}}>{errors.panStatus}</Typography>
 
       {/* Employment Status */}
       <FormControl
@@ -269,6 +310,8 @@ export default function Form() {
           />
         </RadioGroup>
       </FormControl>
+      <Typography color="error" sx={{textAlign:'start', fontSize:12}}>{errors.employment}</Typography>
+
 
       {/* Job & Income */}
       {formData?.employment === "salaried" && (
@@ -280,6 +323,8 @@ export default function Form() {
             name="employerName"
             value={formData.employerName}
             onChange={handleChange}
+            error={!!errors.employerName}
+            helperText={errors.employerName}
           />
           <TextField
             label="Salary"
@@ -289,6 +334,8 @@ export default function Form() {
             name="salary"
             value={formData.salary}
             onChange={handleChange}
+            error={!!errors.salary}
+            helperText={errors.salary}
           />
         </Stack>
       )}
@@ -301,6 +348,8 @@ export default function Form() {
             name="employerName"
             value={formData.employerName}
             onChange={handleChange}
+            error={!!errors.employerName}
+            helperText={errors.employerName}
           />
           <TextField
             label="Income per month"
@@ -310,6 +359,8 @@ export default function Form() {
             name="salary"
             value={formData.salary}
             onChange={handleChange}
+            error={!!errors.salary}
+            helperText={errors.salary}
           />
         </Stack>
       )}
@@ -325,6 +376,8 @@ export default function Form() {
           name="ref1"
           value={formData.refNumbers.ref1}
           onChange={handleRefChange}
+          error={!!errors.ref1}
+          helperText={errors.ref1}
         />
         <TextField
           label="Rf Phone 2"
@@ -334,6 +387,8 @@ export default function Form() {
           name="ref2"
           value={formData.refNumbers.ref2}
           onChange={handleRefChange}
+          error={!!errors.ref2}
+          helperText={errors.ref2}
         />
         <TextField
           label="Email"
@@ -343,6 +398,8 @@ export default function Form() {
           name="email"
           value={formData.email}
           onChange={handleChange}
+          error={!!errors.email}
+          helperText={errors.email}
         />
       </Stack>
 
@@ -352,7 +409,8 @@ export default function Form() {
         value={formData.personMeet}
         onChange={handleAutocompleteChange}
         renderInput={(params) => (
-          <TextField {...params} label="Person Met" fullWidth />
+          <TextField {...params} label="Person Met" fullWidth  error={!!errors.personMeet}
+          helperText={errors.personMeet} />
         )}
         sx={{ mt: 2 }}
       />
@@ -439,6 +497,8 @@ export default function Form() {
         name="comments"
         value={formData.comments}
         onChange={handleChange}
+        error={!!errors.comments}
+        helperText={errors.comments}
       />
 
       {/* File Satisfaction */}
@@ -479,6 +539,8 @@ export default function Form() {
           />
         </RadioGroup>
       </FormControl>
+      <Typography color="error" sx={{textAlign:'start', fontSize:12}}>{errors.fileSatisfaction}</Typography>
+
       {/* Submit Button */}
       <Button
         variant="contained"
