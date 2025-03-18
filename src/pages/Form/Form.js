@@ -28,34 +28,68 @@ const personsOptions = [
 ];
 
 export default function Form() {
-  const [fileEntries, setFileEntries] = useState([]);
-  const [houstType, setHouseType] = useState(null);
-  const [houseAddress, setHouseAddress] = useState(null);
-  const [aadhaarStatus, setAadhaarStatus] = useState(null);
-  const [panStatus, setPanStatus] = useState(null);
-  const [employment, setEmployment] = useState(null);
-  const [employerName, setEmployerName] = useState(null);
-  const [salary, setSalary] = useState(null);
-  const [refNumbers, setRefNumbers] = useState({ ref1: null, ref2: null });
-  const [email, setEmail] = useState(null);
-  const [personMeet, setPersonMeet] = useState(null);
-  const [comments, setComments] = useState(null);
-  const [fileSatisfaction, setFileSatisfaction] = useState(null);
-  
+  const [formData, setFormData] = useState({
+    houseType: "",
+    houseAddress: "",
+    aadhaarStatus: "",
+    panStatus: "",
+    employment: "",
+    employerName: "",
+    salary: "",
+    refNumbers: { ref1: "", ref2: "" },
+    email: "",
+    personMeet: "",
+    personName: "",
+    comments: "",
+    fileSatisfaction: "",
+    fileEntries: [],
+  });
 
+  // Handle Change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle Reference Number Change Separately
+  const handleRefChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      refNumbers: { ...prev.refNumbers, [name]: value },
+    }));
+  };
+
+  // Handle Autocomplete
+  const handleAutocompleteChange = (event, value) => {
+    setFormData((prev) => ({ ...prev, personMeet: value?.label || "" }));
+  };
+
+  // Handle File Upload
   const handleFileChange = (file) => {
-    setFileEntries((prev) => [...prev, file]);
+    setFormData((prev) => ({
+      ...prev,
+      fileEntries: [...prev.fileEntries, file],
+    }));
   };
 
+  // Handle File Removal
   const handleRemoveFiles = (index) => {
-    setFileEntries((prev) => prev.filter((_, i) => i !== index));
+    setFormData((prev) => ({
+      ...prev,
+      fileEntries: prev.fileEntries.filter((_, i) => i !== index),
+    }));
   };
 
+  // Submit Form
   const handleSubmit = () => {
-    console.log("clicked");
+    console.log("Form Data:", formData);
   };
 
-  console.log(personMeet);
   return (
     <Box sx={{ maxWidth: 600, mx: "auto", p: 2, pb: 3 }}>
       <Typography variant="subtitle1">
@@ -88,7 +122,9 @@ export default function Form() {
             justifyContent: "space-between",
             width: "60%",
           }}
-          onChange={(e) => setHouseType(e.target.value)}
+          name="houseType"
+          value={formData.houseType}
+          onChange={handleChange}
         >
           <FormControlLabel
             value="own"
@@ -113,7 +149,9 @@ export default function Form() {
         rows={3}
         fullWidth
         sx={{ mt: 2 }}
-        onChange={(e) => setHouseAddress(e.target.value)}
+        name="houseAddress"
+        value={formData?.houseAddress}
+        onChange={handleChange}
       />
 
       {/* Aadhaar Verification */}
@@ -136,7 +174,9 @@ export default function Form() {
             width: "60%",
             flexWrap: "nowrap",
           }}
-          onChange={(e) => setAadhaarStatus(e.target.value)}
+          name="aadhaarStatus"
+          value={formData.aadhaarStatus}
+          onChange={handleChange}
         >
           <FormControlLabel
             value="verified"
@@ -173,7 +213,9 @@ export default function Form() {
             width: "60%",
             flexWrap: "nowrap",
           }}
-          onChange={(e) => setPanStatus(e.target.value)}
+          name="panStatus"
+          value={formData.panStatus}
+          onChange={handleChange}
         >
           <FormControlLabel
             value="verified"
@@ -199,7 +241,6 @@ export default function Form() {
           Employment
         </FormLabel>
         <RadioGroup
-          value={employment}
           sx={{
             display: "flex",
             flexDirection: "row",
@@ -207,7 +248,9 @@ export default function Form() {
             alignItems: "center",
             flexWrap: "nowrap",
           }}
-          onChange={(e) => setEmployment(e.target.value)}
+          name="employment"
+          value={formData.employment}
+          onChange={handleChange}
         >
           <FormControlLabel
             value="salaried"
@@ -228,37 +271,45 @@ export default function Form() {
       </FormControl>
 
       {/* Job & Income */}
-      {employment === "salaried" && (
+      {formData?.employment === "salaried" && (
         <Stack spacing={2} sx={{ mt: 2 }}>
           <TextField
             label="Employer Name"
             variant="outlined"
             fullWidth
-            onChange={(e) => setEmployerName(e.target.value)}
+            name="employerName"
+            value={formData.employerName}
+            onChange={handleChange}
           />
           <TextField
             label="Salary"
             variant="outlined"
             type="number"
             fullWidth
-            onChange={(e) => setSalary(e.target.value)}
+            name="salary"
+            value={formData.salary}
+            onChange={handleChange}
           />
         </Stack>
       )}
-      {employment === "self-employed" && (
+      {formData?.employment === "self-employed" && (
         <Stack spacing={2} sx={{ mt: 2 }}>
           <TextField
             label="Type of Business"
             variant="outlined"
             fullWidth
-            onChange={(e) => setEmployerName(e.target.value)}
+            name="employerName"
+            value={formData.employerName}
+            onChange={handleChange}
           />
           <TextField
             label="Income per month"
             variant="outlined"
             type="number"
             fullWidth
-            onChange={(e) => setSalary(e.target.value)}
+            name="salary"
+            value={formData.salary}
+            onChange={handleChange}
           />
         </Stack>
       )}
@@ -271,43 +322,49 @@ export default function Form() {
           variant="outlined"
           type="number"
           fullWidth
-          onChange={(e) =>
-            setRefNumbers({ ...refNumbers, ref1: e.target.value })
-          }
+          name="ref1"
+          value={formData.refNumbers.ref1}
+          onChange={handleRefChange}
         />
         <TextField
           label="Rf Phone 2"
           variant="outlined"
           type="number"
           fullWidth
-          onChange={(e) =>
-            setRefNumbers({ ...refNumbers, ref2: e.target.value })
-          }
+          name="ref2"
+          value={formData.refNumbers.ref2}
+          onChange={handleRefChange}
         />
         <TextField
           label="Email"
           variant="outlined"
           type="email"
           fullWidth
-          onChange={(e) => setEmail(e.target.value)}
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
         />
       </Stack>
 
       {/* Person Met */}
       <Autocomplete
         options={personsOptions}
-        onChange={(event, value) => setPersonMeet(value?.label || null)}
+        value={formData.personMeet}
+        onChange={handleAutocompleteChange}
         renderInput={(params) => (
           <TextField {...params} label="Person Met" fullWidth />
         )}
         sx={{ mt: 2 }}
       />
-      {personMeet && (
+      {formData.personMeet && (
         <TextField
           label="Person Name"
           sx={{ mt: 2 }}
           variant="outlined"
           fullWidth
+          name="personName"
+          value={formData.personName}
+          onChange={handleChange}
         />
       )}
 
@@ -335,15 +392,15 @@ export default function Form() {
             onChange={(e) => handleFileChange(e.target.files[0])}
           />
         </Button>
-        {fileEntries?.length > 0 && (
+        {formData?.fileEntries?.length > 0 && (
           <Typography sx={{ ml: 3, fontStyle: "italic" }}>
-            Files Uploaded - {fileEntries?.length}
+            Files Uploaded - {formData?.fileEntries?.length}
           </Typography>
         )}
       </Box>
 
       {/* Uploaded File List */}
-      {fileEntries.map(
+      {formData?.fileEntries.map(
         (file, index) =>
           file && (
             <Box
@@ -379,7 +436,9 @@ export default function Form() {
         rows={3}
         fullWidth
         sx={{ mt: 2 }}
-        onChange={(e) => setComments(e.target.value)}
+        name="comments"
+        value={formData.comments}
+        onChange={handleChange}
       />
 
       {/* File Satisfaction */}
@@ -404,7 +463,9 @@ export default function Form() {
             width: "60%",
             flexWrap: "nowrap",
           }}
-          onChange={(e) => setFileSatisfaction(e.target.value)}
+          name="fileSatisfaction"
+          value={formData.fileSatisfaction}
+          onChange={handleChange}
         >
           <FormControlLabel
             value="positive"
@@ -424,7 +485,7 @@ export default function Form() {
         color="primary"
         fullWidth
         sx={{ mt: 3 }}
-        onChange={handleSubmit}
+        onClick={handleSubmit}
       >
         Submit
       </Button>
