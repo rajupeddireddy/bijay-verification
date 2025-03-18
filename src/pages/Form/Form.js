@@ -14,8 +14,6 @@ import {
   IconButton,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 const personsOptions = [
@@ -26,35 +24,50 @@ const personsOptions = [
   { label: "Brother" },
   { label: "Neighbour" },
   { label: "Co Applicant" },
+  { label: "Others" },
 ];
-
 
 export default function Form() {
   const [fileEntries, setFileEntries] = useState([]);
-  const [employment, setEmployment] = useState("salaried");
+  const [houstType, setHouseType] = useState(null);
+  const [houseAddress, setHouseAddress] = useState(null);
+  const [aadhaarStatus, setAadhaarStatus] = useState(null);
+  const [panStatus, setPanStatus] = useState(null);
+  const [employment, setEmployment] = useState(null);
+  const [employerName, setEmployerName] = useState(null);
+  const [salary, setSalary] = useState(null);
+  const [refNumbers, setRefNumbers] = useState({ ref1: null, ref2: null });
+  const [email, setEmail] = useState(null);
+  const [personMeet, setPersonMeet] = useState(null);
+  const [comments, setComments] = useState(null);
+  const [fileSatisfaction, setFileSatisfaction] = useState(null);
+  
 
   const handleFileChange = (file) => {
-    
-    //const url = URL.createObjectURL(file); // Simulating file upload
-    setFileEntries((prev) =>[...prev, file] );
-  };
-
-  const handleAddMoreFiles = () => {
-    setFileEntries([...fileEntries, { fileName: "", file: null, url: null }]);
+    setFileEntries((prev) => [...prev, file]);
   };
 
   const handleRemoveFiles = (index) => {
     setFileEntries((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleEmployment = (e) => {
-    setEmployment(e.target.value);
+  const handleSubmit = () => {
+    console.log("clicked");
   };
+
+  console.log(personMeet);
   return (
-    <Box sx={{ maxWidth: 600, mx: "auto", p: 2 }}>
-      <Typography variant="subtitle1" >Application Id : <span style={{fontWeight:'bold'}}>BJ25000010</span></Typography>
-      <Typography variant="subtitle1">Loan Type: <span style={{fontWeight:'bold'}}>Personal Loan</span></Typography>
-      <Typography variant="subtitle1">Applicant Name: <span style={{fontWeight:'bold'}}>Raju Peddireddi</span></Typography>
+    <Box sx={{ maxWidth: 600, mx: "auto", p: 2, pb: 3 }}>
+      <Typography variant="subtitle1">
+        Application Id : <span style={{ fontWeight: "bold" }}>BJ25000010</span>
+      </Typography>
+      <Typography variant="subtitle1">
+        Loan Type: <span style={{ fontWeight: "bold" }}>Personal Loan</span>
+      </Typography>
+      <Typography variant="subtitle1">
+        Applicant Name:{" "}
+        <span style={{ fontWeight: "bold" }}>Raju Peddireddi</span>
+      </Typography>
 
       {/* House Ownership */}
       <FormControl
@@ -75,6 +88,7 @@ export default function Form() {
             justifyContent: "space-between",
             width: "60%",
           }}
+          onChange={(e) => setHouseType(e.target.value)}
         >
           <FormControlLabel
             value="own"
@@ -99,6 +113,7 @@ export default function Form() {
         rows={3}
         fullWidth
         sx={{ mt: 2 }}
+        onChange={(e) => setHouseAddress(e.target.value)}
       />
 
       {/* Aadhaar Verification */}
@@ -121,6 +136,7 @@ export default function Form() {
             width: "60%",
             flexWrap: "nowrap",
           }}
+          onChange={(e) => setAadhaarStatus(e.target.value)}
         >
           <FormControlLabel
             value="verified"
@@ -157,6 +173,7 @@ export default function Form() {
             width: "60%",
             flexWrap: "nowrap",
           }}
+          onChange={(e) => setPanStatus(e.target.value)}
         >
           <FormControlLabel
             value="verified"
@@ -182,7 +199,6 @@ export default function Form() {
           Employment
         </FormLabel>
         <RadioGroup
-          onChange={handleEmployment}
           value={employment}
           sx={{
             display: "flex",
@@ -191,6 +207,7 @@ export default function Form() {
             alignItems: "center",
             flexWrap: "nowrap",
           }}
+          onChange={(e) => setEmployment(e.target.value)}
         >
           <FormControlLabel
             value="salaried"
@@ -213,23 +230,35 @@ export default function Form() {
       {/* Job & Income */}
       {employment === "salaried" && (
         <Stack spacing={2} sx={{ mt: 2 }}>
-          <TextField label="Employer Name" variant="outlined" fullWidth />
+          <TextField
+            label="Employer Name"
+            variant="outlined"
+            fullWidth
+            onChange={(e) => setEmployerName(e.target.value)}
+          />
           <TextField
             label="Salary"
             variant="outlined"
             type="number"
             fullWidth
+            onChange={(e) => setSalary(e.target.value)}
           />
         </Stack>
       )}
       {employment === "self-employed" && (
         <Stack spacing={2} sx={{ mt: 2 }}>
-          <TextField label="Type of Business" variant="outlined" fullWidth />
+          <TextField
+            label="Type of Business"
+            variant="outlined"
+            fullWidth
+            onChange={(e) => setEmployerName(e.target.value)}
+          />
           <TextField
             label="Income per month"
             variant="outlined"
             type="number"
             fullWidth
+            onChange={(e) => setSalary(e.target.value)}
           />
         </Stack>
       )}
@@ -242,38 +271,61 @@ export default function Form() {
           variant="outlined"
           type="number"
           fullWidth
+          onChange={(e) =>
+            setRefNumbers({ ...refNumbers, ref1: e.target.value })
+          }
         />
         <TextField
           label="Rf Phone 2"
           variant="outlined"
           type="number"
           fullWidth
+          onChange={(e) =>
+            setRefNumbers({ ...refNumbers, ref2: e.target.value })
+          }
         />
         <TextField
           label="Email"
           variant="outlined"
           type="email"
           fullWidth
+          onChange={(e) => setEmail(e.target.value)}
         />
       </Stack>
 
       {/* Person Met */}
       <Autocomplete
         options={personsOptions}
+        onChange={(event, value) => setPersonMeet(value?.label || null)}
         renderInput={(params) => (
           <TextField {...params} label="Person Met" fullWidth />
         )}
         sx={{ mt: 2 }}
       />
+      {personMeet && (
+        <TextField
+          label="Person Name"
+          sx={{ mt: 2 }}
+          variant="outlined"
+          fullWidth
+        />
+      )}
 
       {/* File Upload */}
-      <Box sx={{ display: "flex", flexDirection: "row", alignItems:'center',  mt: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          mt: 2,
+        }}
+      >
         <Typography sx={{ textAlign: "start" }}>Upload Files</Typography>
         <Button
           variant="outlined"
           component="label"
           startIcon={<CloudUploadIcon />}
-          sx={{ml:3}}
+          sx={{ ml: 3 }}
         >
           Upload
           <input
@@ -283,7 +335,11 @@ export default function Form() {
             onChange={(e) => handleFileChange(e.target.files[0])}
           />
         </Button>
-        {fileEntries?.length > 0  && <Typography sx={{ml:3, fontStyle:'italic'}}>Files Uploaded - {fileEntries?.length}</Typography>}
+        {fileEntries?.length > 0 && (
+          <Typography sx={{ ml: 3, fontStyle: "italic" }}>
+            Files Uploaded - {fileEntries?.length}
+          </Typography>
+        )}
       </Box>
 
       {/* Uploaded File List */}
@@ -302,12 +358,12 @@ export default function Form() {
                 borderRadius: 1,
               }}
             >
-            <img
-              src={URL.createObjectURL(file)}
-              alt={file.name}
-              style={{ width: "150px", height: "150px", }}
-            />
-            <Typography fontSize={12}>{file.name}</Typography>
+              <img
+                src={URL.createObjectURL(file)}
+                alt={file.name}
+                style={{ width: "150px", height: "150px" }}
+              />
+              <Typography fontSize={12}>{file.name}</Typography>
               <IconButton size="small" onClick={() => handleRemoveFiles(index)}>
                 <DeleteIcon />
               </IconButton>
@@ -323,6 +379,7 @@ export default function Form() {
         rows={3}
         fullWidth
         sx={{ mt: 2 }}
+        onChange={(e) => setComments(e.target.value)}
       />
 
       {/* File Satisfaction */}
@@ -347,6 +404,7 @@ export default function Form() {
             width: "60%",
             flexWrap: "nowrap",
           }}
+          onChange={(e) => setFileSatisfaction(e.target.value)}
         >
           <FormControlLabel
             value="positive"
@@ -361,7 +419,13 @@ export default function Form() {
         </RadioGroup>
       </FormControl>
       {/* Submit Button */}
-      <Button variant="contained" color="primary" fullWidth sx={{ mt: 3 }}>
+      <Button
+        variant="contained"
+        color="primary"
+        fullWidth
+        sx={{ mt: 3 }}
+        onChange={handleSubmit}
+      >
         Submit
       </Button>
     </Box>
