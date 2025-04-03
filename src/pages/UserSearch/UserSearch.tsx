@@ -9,6 +9,7 @@ const UserSearch = () => {
   const [applications, setApplications] = useState([]);
   const user = JSON.parse(localStorage.getItem('user') || "")
   const [loading, setLoading] = useState(false)
+  const [noResults, setNoResults] = useState(false)
   const navigate = useNavigate()
 
   const handleSearch = async () => {
@@ -23,15 +24,20 @@ const UserSearch = () => {
         }
       });
       const data =  res.data;
-      console.log(data, 'response')
+      //console.log(data, 'response')
       if(data?.data?.length > 0){
         setApplications(data?.data)
+        setNoResults(false); 
+      }else{
+        setApplications([])
+        setNoResults(true); 
       }
       
     } catch (error) {
       console.error("Error fetching applications:", error);
     }finally{
       setLoading(false)
+      setSearchInput("")
     }
   };
 
@@ -39,9 +45,9 @@ const UserSearch = () => {
     <Container maxWidth="xs">
       <Navbar/>
       <Box display="flex" flexDirection="column" alignItems="center" mt={2} maxHeight={'100vh'}>
-        {/* <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" gutterBottom sx={{textAlign:'flex-start'}}>
           Search Application
-        </Typography> */}
+        </Typography>
         <TextField
           label="Enter atleast 5 characters of Name/Id/phone"
           variant="outlined"
@@ -53,6 +59,13 @@ const UserSearch = () => {
         <Button variant="contained" color="primary" fullWidth onClick={handleSearch} sx={{ mt: 2 }} loading={loading}>
           Search
         </Button>
+
+         {/* If API search returns an empty array, show this message */}
+         {noResults && (
+          <Typography sx={{ mt: 3, color: "red", fontSize: "14px" }}>
+            Oops, No applications found!
+          </Typography>
+        )}
         
         {applications.length > 0 && (
           <Box sx={{ width: "100%", mt: 3 }}>
@@ -63,7 +76,7 @@ const UserSearch = () => {
                 <Typography sx={{ fontSize: "14px" }}>Loan Type: {app.instituteName}</Typography>
                 <Typography sx={{ fontSize: "14px" }}>Amount: {app.courseFees}</Typography>
                 <Typography sx={{ fontSize: "14px" }}>Status: {app.status}</Typography>
-                <Typography sx={{ fontSize: "14px", textAlign: 'end', textDecoration:'underline', }} color='primary' onClick={() => navigate("/form")}>Complete verification →</Typography>
+                <Typography sx={{ fontSize: "14px", textAlign: 'end', textDecoration:'underline', cursor:'pointer'}} color='primary' onClick={() => navigate("/form", {state: app})}>Complete verification →</Typography>
               </Box>
             ))}
           </Box>

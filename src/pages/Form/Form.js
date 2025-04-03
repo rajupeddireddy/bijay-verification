@@ -12,10 +12,14 @@ import {
   Autocomplete,
   Stack,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Navbar from "../../components/Navbar/Navbar.tsx";
+import { useLocation } from "react-router-dom";
 
 const personsOptions = [
   { label: "Applicant" },
@@ -25,10 +29,14 @@ const personsOptions = [
   { label: "Brother" },
   { label: "Neighbour" },
   { label: "Co Applicant" },
+  { label: "Friend/Colleague" },
   { label: "Others" },
 ];
 
 export default function Form() {
+  const location = useLocation();
+  const { applicationId, name, courseFees, instituteName } =
+    location?.state || {};
   const [formData, setFormData] = useState({
     houseType: "",
     houseAddress: "",
@@ -37,7 +45,10 @@ export default function Form() {
     employment: "",
     employerName: "",
     salary: "",
-    refNumbers: { ref1: "", ref2: "" },
+    refNumbers: [
+      { name1: "", contact1: "", relationship1: "" },
+      { name2: "", contact2: "", relationship2: "" },
+    ],
     email: "",
     personMeet: "",
     personName: "",
@@ -59,12 +70,15 @@ export default function Form() {
   };
 
   // Handle Reference Number Change Separately
-  const handleRefChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      refNumbers: { ...prev.refNumbers, [name]: value },
-    }));
+  const handleRefChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updatedRefNumbers = [...prev.refNumbers];
+      updatedRefNumbers[index] = {
+        ...updatedRefNumbers[index],
+        [field]: value,
+      };
+      return { ...prev, refNumbers: updatedRefNumbers };
+    });
   };
 
   // Handle Autocomplete
@@ -111,16 +125,23 @@ export default function Form() {
     )
       newErrors.salary = "*Salary must be greater than 0";
 
-    if (!/^\d{10}$/.test(formData.refNumbers.ref1))
-      newErrors.ref1 = "*Reference number must be 10 digits";
-    if (!/^\d{10}$/.test(formData.refNumbers.ref2))
-      newErrors.ref2 = "*Reference number must be 10 digits";
+    if (!/^\d{10}$/.test(formData.refNumbers[0].contact1))
+      newErrors.contact1 = "*Reference number must be 10 digits";
+    if (!/^\d{10}$/.test(formData.refNumbers[1].contact2))
+      newErrors.contact2 = "*Reference number must be 10 digits";
 
     if (!formData.email.trim()) {
       newErrors.email = "*Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "*Invalid email format";
     }
+
+    if (!formData.refNumbers[0].name1) newErrors.name1 = "*name is required";
+    if (!formData.refNumbers[0].name2) newErrors.name2 = "*name is required";
+    if (!formData.refNumbers[0].relationship1)
+      newErrors.relationship1 = "*relation is required";
+    if (!formData.refNumbers[0].relationship2)
+      newErrors.relationship2 = "*relation is required";
 
     if (!formData.personMeet) newErrors.personMeet = "*Person met is required";
     if (!formData.comments.trim())
@@ -145,15 +166,17 @@ export default function Form() {
   return (
     <Box sx={{ maxWidth: 600, mx: "auto", pb: 3 }}>
       <Navbar />
-      <Typography variant="subtitle1">
-        Application Id : <span style={{ fontWeight: "bold" }}>BJ25000010</span>
+      <Typography variant="subtitle1" sx={{ mt: 1, textAlign: "start" }}>
+        Id : <span style={{ fontWeight: "bold" }}>{applicationId}</span>
       </Typography>
-      <Typography variant="subtitle1">
-        Loan Type: <span style={{ fontWeight: "bold" }}>Personal Loan</span>
+      <Typography variant="subtitle1" sx={{ textAlign: "start" }}>
+        Loan Type: <span style={{ fontWeight: "bold" }}>{instituteName}</span>
       </Typography>
-      <Typography variant="subtitle1">
-        Applicant Name:{" "}
-        <span style={{ fontWeight: "bold" }}>Raju Peddireddi</span>
+      <Typography variant="subtitle1" sx={{ textAlign: "start" }}>
+        Name: <span style={{ fontWeight: "bold" }}>{name}</span>
+      </Typography>
+      <Typography variant="subtitle1" sx={{ textAlign: "start" }}>
+        Amount <span style={{ fontWeight: "bold" }}>{courseFees}</span>
       </Typography>
 
       {/* House Ownership */}
@@ -390,30 +413,109 @@ export default function Form() {
       )}
 
       {/* Contact Details */}
+
       <Stack spacing={2} sx={{ mt: 2 }}>
-        <Typography sx={{ textAlign: "start" }}>Ref Phone Numbers</Typography>
-        <TextField
-          label="Rf Phone 1"
-          variant="outlined"
-          type="number"
-          fullWidth
-          name="ref1"
-          value={formData.refNumbers.ref1}
-          onChange={handleRefChange}
-          error={!!errors.ref1}
-          helperText={errors.ref1}
-        />
-        <TextField
-          label="Rf Phone 2"
-          variant="outlined"
-          type="number"
-          fullWidth
-          name="ref2"
-          value={formData.refNumbers.ref2}
-          onChange={handleRefChange}
-          error={!!errors.ref2}
-          helperText={errors.ref2}
-        />
+        <Typography sx={{ textAlign: "start" }}>References 1</Typography>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            alignItems: "center",
+          }}
+        >
+          <TextField
+            label="Name"
+            variant="outlined"
+            error={!!errors.name1}
+            helperText={errors.name1}
+            fullWidth
+            value={formData.refNumbers[0].name1}
+            onChange={(e) => handleRefChange(0, "name1", e.target.value)}
+          />
+
+          <TextField
+            label="Contact 1"
+            variant="outlined"
+            sx={{ mt: 1 }}
+            type="number"
+            fullWidth
+            error={!!errors.contact1}
+            helperText={errors.contact1}
+            value={formData.refNumbers[0].contact1}
+            onChange={(e) => handleRefChange(0, "contact1", e.target.value)}
+          />
+
+          <Autocomplete
+            options={personsOptions}
+            value={formData.refNumbers[0].relationship1}
+            sx={{ mt: 1 }}
+            fullWidth
+            onChange={(event, value) =>
+              handleRefChange(0, "relationship1", value)
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Relation"
+                error={!!errors.relationship1}
+                helperText={errors.relationship1}
+              />
+            )}
+          />
+        </Box>
+      </Stack>
+      <Stack spacing={2} sx={{ mt: 2 }}>
+        <Typography sx={{ textAlign: "start" }}>References 2</Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            alignItems: "center",
+          }}
+        >
+          <TextField
+            label="Name"
+            variant="outlined"
+            error={!!errors.name2}
+            helperText={errors.name2}
+            fullWidth
+            value={formData.refNumbers[1].name1}
+            onChange={(e) => handleRefChange(1, "name2", e.target.value)}
+          />
+
+          <TextField
+            label="Contact 2"
+            variant="outlined"
+            type="number"
+            sx={{ mt: 1 }}
+            fullWidth
+            error={!!errors.contact2}
+            helperText={errors.contact2}
+            value={formData.refNumbers[1].contact1}
+            onChange={(e) => handleRefChange(1, "contact2", e.target.value)}
+          />
+
+          <Autocomplete
+            options={personsOptions}
+            value={formData.refNumbers[1].relationship2}
+            sx={{ mt: 1 }}
+            fullWidth
+            onChange={(event, value) =>
+              handleRefChange(1, "relationship2", value)
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Relation"
+                error={!!errors.relationship2}
+                helperText={errors.relationship2}
+              />
+            )}
+          />
+        </Box>
         <TextField
           label="Email"
           variant="outlined"
@@ -426,7 +528,6 @@ export default function Form() {
           helperText={errors.email}
         />
       </Stack>
-
       {/* Person Met */}
       <Autocomplete
         options={personsOptions}
@@ -474,14 +575,14 @@ export default function Form() {
           Upload
           <input
             type="file"
-            accept="image/*"
+            accept="*"
             hidden
             onChange={(e) => handleFileChange(e.target.files[0])}
           />
         </Button>
         {formData?.fileEntries?.length > 0 && (
           <Typography sx={{ ml: 3, fontStyle: "italic" }}>
-            Files Uploaded - {formData?.fileEntries?.length}
+            Uploaded - {formData?.fileEntries?.length}
           </Typography>
         )}
       </Box>
@@ -502,11 +603,13 @@ export default function Form() {
                 borderRadius: 1,
               }}
             >
-              <img
-                src={URL.createObjectURL(file)}
-                alt={file.name}
-                style={{ width: "150px", height: "150px" }}
-              />
+              {file.type.startsWith("image/") && (
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={file.name}
+                  style={{ width: "120px", height: "120px" }}
+                />
+              )}
               <Typography fontSize={12}>{file.name}</Typography>
               <IconButton size="small" onClick={() => handleRemoveFiles(index)}>
                 <DeleteIcon />

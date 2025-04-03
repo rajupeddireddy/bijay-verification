@@ -1,17 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, Button, Container, Typography, Box } from "@mui/material";
 import logo from '../../assets/images/bijaylogo.png'
 import { axiosInstance } from "../../helpers/axios.tsx";
 import { useNavigate } from "react-router-dom";
 
+
 const LoginPage = () => {
   const navigate = useNavigate()
+  const user = localStorage.getItem("user");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [emailVerified, setEmailVerified] = useState(false)
   const [error, setError] = useState<string | null>()
   const [loginError, setLoginError] = useState<string | null>()
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      navigate("/userSearch"); // Redirect to another page if already logged in
+    }
+  }, [user, navigate]);
 
   const validateEmail = email => {
     const regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
