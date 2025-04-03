@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 export default function Navbar() {
   const navigation = useNavigate()
   const handleLogout = () => {
-      localStorage.removeItem("user")
+      sessionStorage.removeItem("user")
       navigation("/")
   }
   return (

@@ -20,6 +20,8 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Navbar from "../../components/Navbar/Navbar.tsx";
 import { useLocation } from "react-router-dom";
+import { axiosInstance } from "../../helpers/axios.tsx";
+import { useNavigate } from "react-router-dom";
 
 const personsOptions = [
   { label: "Applicant" },
@@ -35,6 +37,8 @@ const personsOptions = [
 
 export default function Form() {
   const location = useLocation();
+  const navigation = useNavigate();
+  const user = JSON.parse(sessionStorage.getItem("user"));
   const { applicationId, name, courseFees, instituteName } =
     location?.state || {};
   const [formData, setFormData] = useState({
@@ -137,10 +141,10 @@ export default function Form() {
     }
 
     if (!formData.refNumbers[0].name1) newErrors.name1 = "*name is required";
-    if (!formData.refNumbers[0].name2) newErrors.name2 = "*name is required";
+    if (!formData.refNumbers[1].name2) newErrors.name2 = "*name is required";
     if (!formData.refNumbers[0].relationship1)
       newErrors.relationship1 = "*relation is required";
-    if (!formData.refNumbers[0].relationship2)
+    if (!formData.refNumbers[1].relationship2)
       newErrors.relationship2 = "*relation is required";
 
     if (!formData.personMeet) newErrors.personMeet = "*Person met is required";
@@ -154,12 +158,42 @@ export default function Form() {
   };
 
   // Submit Form
+  const submitVerificationDetails = async () => {
+    const body = {
+      ...formData,
+      applicationId: "BJ25000032",
+      refNumbers: JSON.stringify(formData.refNumbers),
+      fileEntries: JSON.stringify(
+        formData.fileEntries.map((file) => ({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        }))
+      ),
+    };
+    try {
+      const res = await axiosInstance.post("verification-tab/create", body, {
+        headers: {
+          Authorization: `Bearer ${user}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = res?.data;
+      if (data?.message === "Successful") {
+        alert("Details Submitted Successfully");
+        navigation("/userSearch");
+      }
+    } catch (error) {
+      alert(`Submission failed, Please try again, ${error}`);
+    }
+  };
+
   const handleSubmit = () => {
     if (formValidation()) {
-      console.log("Form Data Submitted: ", formData);
-      alert("Form submitted successfully!");
+      // console.log("Form Data Submitted: ", formData);
+      submitVerificationDetails();
     } else {
-      console.log("Validation Error: ", errors);
+      alert(`Please fill the required* fields`);
     }
   };
 

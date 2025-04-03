@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const navigate = useNavigate()
-  const user = localStorage.getItem("user");
+  const user = sessionStorage.getItem("user");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [emailVerified, setEmailVerified] = useState(false)
@@ -77,7 +77,7 @@ const LoginPage = () => {
       const data = res.data
       console.log(data, 'response')
       if(data?.data){
-        localStorage.setItem('user', JSON.stringify(data?.data))
+        sessionStorage.setItem('user', JSON.stringify(data?.data))
         navigate('/userSearch')
       }else{
         setLoginError("Invalid user/otp")
